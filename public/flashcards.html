@@ -1,0 +1,378 @@
+<html>
+<head>
+  <title>Flashcard Quiz</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .flashcard-container {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 450px;
+      width: 100%;
+    }
+
+    .flashcard {
+      width: 100%;
+      height: 220px;
+      perspective: 1000px;
+      margin-bottom: 20px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .flashcard .front, .flashcard .back {
+      width: 100%;
+      height: 80%;
+      position: absolute;
+      border-radius: 15px;
+      backface-visibility: hidden;
+      background: #fefefe;
+      border: 2px solid #4CAF50;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      padding: 20px;
+      text-align: center;
+      transition: transform 0.6s;
+    }
+
+    .flashcard .back {
+      transform: rotateY(180deg);
+    }
+
+    .flashcard.flip .front {
+      transform: rotateY(180deg);
+    }
+
+    .flashcard.flip .back {
+      transform: rotateY(360deg);
+    }
+
+    .options {
+      margin-top: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .options button {
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .options button:hover {
+      background-color: #45a049;
+    }
+
+    .controls {
+      margin-top: 15px;
+    }
+
+    .controls button {
+      margin: 5px 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #2196F3;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .controls button:hover {
+      background-color: #1976D2;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="flashcard-container">
+    <div class="flashcard" id="flashcard">
+      <div class="front" id="flashcard-front">Question?</div>
+      <div class="back" id="flashcard-back">Answer!</div>
+    </div>
+
+    <div class="options" id="options-container">
+      <!-- Options will appear here dynamically -->
+    </div>
+
+    <div class="controls">
+      <button onclick="prevCard()">⬅ Prev</button>
+      <button onclick="flipCard()">🔄 Flip</button>
+      <button onclick="nextCard()">➡ Next</button>
+    </div>
+  </div>
+
+ <script>
+  const flashcards = [
+    { 
+      question: "I started in a garage, revolutionized personal computing, and my logo was once a rainbow. Who am I?", 
+      answer: "Apple",
+      options: ["Apple", "Google", "IBM", "Dell"]
+    },
+    { 
+      question: "I began as a search engine, but now I'm everywhere—phones, browsers, even cars. Who am I?", 
+      answer: "Google",
+      options: ["Google", "Amazon", "Meta", "Intel"]
+    },
+    { 
+      question: "You use my Word, Excel, and Teams every day. My founder dropped out of Harvard. Who am I?", 
+      answer: "Microsoft",
+      options: ["Microsoft", "Oracle", "Salesforce", "Dropbox"]
+    },
+    { 
+      question: "I'm the cloud king, I started by selling books, and I own Twitch. Who am I?", 
+      answer: "Amazon",
+      options: ["Amazon", "eBay", "Netflix", "Alibaba"]
+    },
+    { 
+      question: "I own WhatsApp, Instagram, and the largest social media network. Who am I?", 
+      answer: "Meta",
+      options: ["Meta", "Twitter", "Snapchat", "Reddit"]
+    },
+    { 
+      question: "I make the chips that power AI, games, and data centers. My GPUs are legendary. Who am I?", 
+      answer: "NVIDIA",
+      options: ["NVIDIA", "AMD", "Intel", "Qualcomm"]
+    },
+    {
+    question: "I'm the invisible magician that converts bytecode into machine instructions. Without me, your Java code is just gibberish. Who am I?",
+    answer: "JVM",
+    options: ["JVM", "JDK", "JRE", "Garbage Collector"]
+    },
+  {
+    question: "I let one method behave differently in different subclasses. I'm one word, but I wear many forms. Who am I?",
+    answer: "Polymorphism",
+    options: ["Polymorphism", "Inheritance", "Encapsulation", "Abstraction"]
+  },
+  {
+    question: "I define behavior but contain no implementation. You can implement me but not instantiate me. Who am I?",
+    answer: "Interface",
+    options: ["Class", "Object", "Abstract Class", "Interface"]
+  },
+  {
+    question: "I control access to the insides of objects. I use private, public, and protected shields. Who am I?",
+    answer: "Encapsulation",
+    options: ["Inheritance", "Abstraction", "Encapsulation", "Polymorphism"]
+  },
+  {
+    question: "I’m born from a class but can hold real data. I'm the one you use to call methods. Who am I?",
+    answer: "Object",
+    options: ["Method", "Object", "Variable", "Package"]
+  },
+  {
+    question: "I’m the one who gives life to Java programs. I hold classes, libraries, and compilers. Without me, you can't even begin. Who am I?",
+    answer: "JDK",
+    options: ["JVM", "JDK", "JRE", "SDK"]
+  },
+  {
+    question: "I run only once when an object is born. My name matches the class, and I never return anything. Who am I?",
+    answer: "Constructor",
+    options: ["Constructor", "Method", "Loop", "Instance"]
+  },
+  {
+    question: "I'm where unused objects go. I silently clean up memory without you noticing. Who am I?",
+    answer: "Garbage Collector",
+    options: ["Garbage Collector", "Destructor", "Thread", "Memory Pool"]
+  },
+  {
+    question: "I allow multiple threads to work independently but can also cause chaos if not handled properly. Who am I?",
+    answer: "Multithreading",
+    options: ["Polymorphism", "Exception Handling", "Multithreading", "Recursion"]
+  },
+  {
+    question: "I catch errors at runtime and help prevent program crashes. Try me if you must, but catch me if you can. Who am I?",
+    answer: "Exception Handling",
+    options: ["Debugger", "Multithreading", "Exception Handling", "Break Statement"]
+  }
+  ];
+
+  let currentCard = 0;
+  let score = 0;
+  let answered = false;
+
+  const flashcard = document.getElementById('flashcard');
+  const front = document.getElementById('flashcard-front');
+  const back = document.getElementById('flashcard-back');
+  const optionsContainer = document.getElementById('options-container');
+
+  const controlsDiv = document.querySelector('.controls');
+  const scoreDiv = document.createElement('div');
+  scoreDiv.style.marginTop = '10px';
+  scoreDiv.style.fontSize = '18px';
+  scoreDiv.style.fontWeight = 'bold';
+  controlsDiv.appendChild(scoreDiv);
+
+  const feedback = document.createElement('div');
+  feedback.style.marginTop = '10px';
+  feedback.style.fontSize = '16px';
+  controlsDiv.appendChild(feedback);
+
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = '➡ Next';
+  nextBtn.style.display = 'none';
+  nextBtn.onclick = () => {
+    currentCard++;
+    if (currentCard < flashcards.length) {
+      showCard(currentCard);
+    } else {
+      showFinalScore();
+    }
+  };
+  controlsDiv.appendChild(nextBtn);
+
+  const playAgainBtn = document.createElement('button');
+  playAgainBtn.textContent = '🔄 Play Again';
+  playAgainBtn.style.display = 'none';
+  playAgainBtn.onclick = () => {
+    currentCard = 0;
+    score = 0;
+    playAgainBtn.style.display = 'none';
+    showCard(currentCard);
+  };
+  controlsDiv.appendChild(playAgainBtn);
+
+  function showCard(index) {
+    const card = flashcards[index];
+    front.textContent = card.question;
+    back.textContent = card.answer;
+    flashcard.classList.remove('flip');
+    answered = false;
+    feedback.textContent = '';
+    nextBtn.style.display = 'none';
+    playAgainBtn.style.display = 'none';
+
+    scoreDiv.textContent = `Score: ${score}/${flashcards.length}`;
+
+    // Load options
+    optionsContainer.innerHTML = '';
+    shuffleArray(card.options).forEach(option => {
+      const btn = document.createElement('button');
+      btn.textContent = option;
+      btn.onclick = () => checkAnswer(option, btn);
+      optionsContainer.appendChild(btn);
+    });
+  }
+
+//   function checkAnswer(selectedOption, btn) {
+//   if (answered) return;
+//   const correctAnswer = flashcards[currentCard].answer;
+//   const correctSound = document.getElementById('correct-sound');
+//   const wrongSound = document.getElementById('wrong-sound');
+
+//   if (selectedOption === correctAnswer) {
+//     score++;
+//     feedback.textContent = "✅ Correct!";
+//     feedback.style.color = "green";
+//     btn.style.backgroundColor = "#4CAF50";
+//     correctSound.play();
+//   } else {
+//     feedback.textContent = `❌ Wrong! Correct answer: ${correctAnswer}`;
+//     feedback.style.color = "red";
+//     btn.style.backgroundColor = "#f44336";
+//     wrongSound.play();
+//   }
+//   answered = true;
+//   nextBtn.style.display = 'inline-block';
+// }
+
+
+  function flipCard() {
+    flashcard.classList.toggle('flip');
+  }
+
+  function showFinalScore() {
+    front.textContent = `🎉 Your Score: ${score}/${flashcards.length}`;
+    back.textContent = "Great job!";
+    flashcard.classList.remove('flip');
+    optionsContainer.innerHTML = '';
+    feedback.textContent = '';
+    scoreDiv.textContent = '';
+    nextBtn.style.display = 'none';
+    playAgainBtn.style.display = 'inline-block';
+  }
+
+  function shuffleArray(array) {
+    return array.slice().sort(() => Math.random() - 0.5);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    showCard(currentCard);
+  });
+
+  // Expose flipCard globally
+  window.flipCard = flipCard;
+</script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  let playerId = null;
+
+  const playerName = prompt("Enter your name:");
+  socket.emit('joinGame', playerName);
+
+  socket.on('connect', () => {
+    playerId = socket.id;
+  });
+
+  socket.on('updatePlayers', (players) => {
+    console.log("Players:", players);
+    // You can dynamically update the scoreboard here
+  });
+
+ function checkAnswer(selectedOption, btn) {
+  if (answered) return;
+  const correctAnswer = flashcards[currentCard].answer;
+  const isCorrect = selectedOption === correctAnswer;
+
+  if (isCorrect) {
+    score++;
+    feedback.textContent = "✅ Correct!";
+    feedback.style.color = "green";
+    btn.style.backgroundColor = "#4CAF50";
+    document.getElementById('correct-sound').play();
+  } else {
+    feedback.textContent = `❌ Wrong! Correct answer: ${correctAnswer}`;
+    feedback.style.color = "red";
+    btn.style.backgroundColor = "#f44336";
+    document.getElementById('wrong-sound').play();
+  }
+
+   answered = true;
+  nextBtn.style.display = 'inline-block';
+  
+  // Emit result to server
+  socket.emit('submitAnswer', { playerId, isCorrect });
+
+ 
+}
+
+</script>
+
+
+<audio id="correct-sound" src="correct.mp3" preload="auto"></audio>
+<audio id="wrong-sound" src="wrong.mp3" preload="auto"></audio>
+
+
+</body>
+</html>
